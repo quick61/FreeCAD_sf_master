@@ -55,33 +55,38 @@ class involute_gear():
             rot.rotateZ(i*self.gearwheel.phipart)
             wi.append(wi0.transformGeometry(rot))
         wi = Wire(wi)
-        sh = Face(wi)
         if fp.beta == 0:
+            sh = Face(wi)
             fp.Shape = sh.extrude(App.Vector(0,0,fp.hight))            
         else:
-            fp.Shape = helicalextrusion(sh, fp.hight, fp.hight * tan(self.gearwheel.beta) * 2 / self.gearwheel.d)
+            fp.Shape = helicalextrusion(wi, fp.hight, fp.hight * tan(self.gearwheel.beta) * 2 / self.gearwheel.d)
 
 
-def helicalextrusion(faceb, height, angle):
+def helicalextrusion(wire, height, angle):
+    faceb = Face(wire)
     faceu=faceb.copy()
     facetransform=App.Matrix()
     facetransform.rotateZ(angle)
     facetransform.move(App.Vector(0,0,height))
     faceu.transformShape(facetransform)
-    step = 4 + int(angle / pi * 2) 
+    step = 2 + int(angle / pi * 4 )
     angleinc = angle / (step - 1)
-    zinc = height / (step-1.0)
+    zinc = height / (step-1)
     spine = makePolygon([(0, 0, i * zinc) for i in range(step)])
-    auxspine = makePolygon([(cos(i * angleinc),sin(i * angleinc),i * height/(step-1))for i in range(step)])
+    auxspine = makePolygon(
+        [
+            (cos(i * angleinc),
+            sin(i * angleinc),
+            i * height/(step-1))for i in range(step)
+        ])
     faces=[faceb,faceu]
-    for wire in faceb.Wires:
-        pipeshell = BRepOffsetAPI.MakePipeShell(spine)
-        pipeshell.setSpineSupport(spine)
-        pipeshell.add(wire)
-        pipeshell.setAuxiliarySpine(auxspine,True,False)
-        assert(pipeshell.isReady())
-        pipeshell.build()
-        faces.extend(pipeshell.shape().Faces)
+    pipeshell = BRepOffsetAPI.MakePipeShell(spine)
+    pipeshell.setSpineSupport(spine)
+    pipeshell.add(wire)
+    pipeshell.setAuxiliarySpine(auxspine,True,False)
+    assert(pipeshell.isReady())
+    pipeshell.build()
+    faces.extend(pipeshell.shape().Faces)
 
     fullshell = Shell(faces)
     solid = Solid(fullshell)
@@ -134,8 +139,8 @@ class cycloide_gear():
             rot.rotateZ(i*self.cycloidegear.phipart)
             wi.append(wi0.transformGeometry(rot))
         wi = Wire(wi)
-        sh = Face(wi)
         if fp.beta == 0:
+            sh = Face(wi)
             fp.Shape = sh.extrude(App.Vector(0,0,fp.hight))            
         else:
-            fp.Shape = helicalextrusion(sh, fp.hight, fp.hight * tan(fp.beta * pi / 180) * 2 / self.cycloidegear.d)
+            fp.Shape = helicalextrusion(wi, fp.hight, fp.hight * tan(fp.beta * pi / 180) * 2 / self.cycloidegear.d)
