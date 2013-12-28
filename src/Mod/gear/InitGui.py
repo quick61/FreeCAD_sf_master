@@ -1,6 +1,6 @@
 import FreeCADGui as Gui
 import FreeCAD
-import gearGui
+import gear_rc
 
 
 class gearWorkbench(Workbench):
@@ -13,8 +13,14 @@ class gearWorkbench(Workbench):
         return "Gui::PythonWorkbench"
 
     def Initialize(self):
+
+        from gearfunc import CreateCycloideGear, CreateInvoluteGear
+
         self.appendToolbar("Gear", ["CreateInvoluteGear", "CreateCycloideGear"])
         self.appendMenu("Gear", ["CreateInvoluteGear", "CreateCycloideGear"])
+        Gui.addIconPath(FreeCAD.getHomePath()+"Mod/gear/icons/")
+        Gui.addCommand('CreateInvoluteGear', CreateInvoluteGear())
+        Gui.addCommand('CreateCycloideGear', CreateCycloideGear())
 
     def Activated(self):
         pass
