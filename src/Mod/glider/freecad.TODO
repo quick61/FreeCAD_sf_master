@@ -1,0 +1,49 @@
+todo liste:
+
+
+Gui:
+  ✔ erstellen eines Modules @done (13-11-27 07:47)
+  ✔ automatisches laden beim starten @done (13-11-27 07:47)
+  ✔ erstellen eines icons für das Module @done (13-11-27 07:47)
+  ☐ erstellen eines widgets
+  ☐ einbauen des widgets
+  ✔ einfuegen eines icon @done (13-11-27 07:48)
+
+Objekte:
+  Punkt:
+    ✔ highlighten @done (13-11-27 07:55)
+    ✔ verschieben @done (13-11-27 07:58)
+    ☐ feines verschieben
+   Linie:
+    ✔ erstellen @done (13-11-27 07:58)
+    ☐ punkte hinzufügen /entfernen
+   Spline:
+    ☐ erstellen
+    ☐ teilweise Linie
+
+Aerotool:
+  Profil:
+    ✔ Einladen eines Profils @done (13-11-27 07:58)
+    ☐ dynamisches verändern von parametern
+    ☐ Umwandlung in Spline
+    ☐ Spline bearbeitung
+    ☐ Xfoil anbindung (pyxfoil)
+   LiftingLine:
+     ☐ vorhandene packages anschauen
+     ☐ ...
+   Apame:
+    ☐ direkte Anbindung?
+    ☐ file aus mesh erstellen
+    ☐ ergebnisse visualisieren
+
+
+
+
+
+GliderTool:
+
+FreeCAD-Forum:
+ ☐ Antwort an wmayer
+   super!! danke.
+   Den dritten Punkt hab ich jetzt auch wieder endteckt. Mit PropertyLink und PropertyLinkList haben sich
+   solche Verknüpfungen erstellen lassen. Allerdings wird nur bei PropertyLink bei Verändern des "Links" das objekt mitverändert. Bei PropertyLinkList funktioniert das bei mir nicht. 
