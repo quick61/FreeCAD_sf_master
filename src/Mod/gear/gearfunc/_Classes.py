@@ -61,6 +61,25 @@ class involute_gear():
         else:
             fp.Shape = helicalextrusion(wi, fp.hight, fp.hight * tan(self.gearwheel.beta) * 2 / self.gearwheel.d)
 
+    def onChanged(self, fp, prop):
+        if abs(fp.shift) > 1.:
+            App.Console.PrintWarning("shift!!!")
+        if abs(fp.beta)> 45:
+            App.Console.PrintWarning("beta!!!")
+            fp.beta = 0.
+        if  abs(fp.alpha) > 40:
+            App.Console.PrintWarning("alpha!!!")
+            fp.alpha = 0.
+        if fp.modul <= 0.:
+            App.Console.PrintWarning("modul!!!")
+            fp.modul = 0.25
+        if fp.clearence > 0.25:
+            App.Console.PrintWarning("clearence!!!")
+            fp.clearence = 0.25
+        if fp.clearence < 0.00:
+            App.Console.PrintWarning("clearence!!!")
+            fp.clearence = 0.00
+
 
 def helicalextrusion(wire, height, angle):
     faceb = Face(wire)
@@ -144,3 +163,17 @@ class cycloide_gear():
             fp.Shape = sh.extrude(App.Vector(0,0,fp.hight))            
         else:
             fp.Shape = helicalextrusion(wi, fp.hight, fp.hight * tan(fp.beta * pi / 180) * 2 / self.cycloidegear.d)
+
+    def onChanged(self, fp, prop):
+        if abs(fp.beta)> 45:
+            App.Console.PrintWarning("beta!!!")
+            fp.beta = 0.
+        if fp.modul <= 0.:
+            App.Console.PrintWarning("modul!!!")
+            fp.modul = 0.25
+        if fp.clearence > 0.25:
+            App.Console.PrintWarning("clearence!!!")
+            fp.clearence = 0.25
+        if fp.clearence < 0.0:
+            App.Console.PrintWarning("clearence!!!")
+            fp.clearence = 0.0

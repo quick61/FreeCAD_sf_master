@@ -1,5 +1,5 @@
 import FreeCADGui as Gui
-import gliderGui
+import getcommands
 
 
 class gliderWorkbench(Workbench):
@@ -13,12 +13,8 @@ class gliderWorkbench(Workbench):
 
     def Initialize(self):
         #load the module
-        self.appendToolbar("Glider", ["LoadGlider","ChangeShape"])
-        self.appendMenu("Glider", ["LoadGlider","ChangeShape"])
-
-        profileitems = ["LoadProfile", "ChangeProfile", "CompareProfile", "MergeProfile", "RunXfoil"]
-        self.appendToolbar("Profile", profileitems)
-        self.appendMenu("Profile", profileitems)
+        self.appendToolbar("Glider", ["LoadProfile", "CreateGlider"])
+        self.appendMenu("Glider", ["LoadProfile"])
 
     def Activated(self):
         pass
@@ -27,6 +23,3 @@ class gliderWorkbench(Workbench):
         pass
 
 Gui.addWorkbench(gliderWorkbench())
-
-# Append the open handler
-#FreeCAD.EndingAdd("probe formats (*.bmp *.jpg *.png *.xpm)","probeGui")
