@@ -1,7 +1,7 @@
 import FreeCADGui as Gui
-import FreeCAD
-from gearfunc import CreateCycloideGear, CreateInvoluteGear
+from gearfunc import CreateCycloideGear, CreateInvoluteGear, CreateBevelGear
 
-Gui.addIconPath(FreeCAD.getHomePath()+"Mod/gear/icons/")
+
 Gui.addCommand('CreateInvoluteGear', CreateInvoluteGear())
 Gui.addCommand('CreateCycloideGear', CreateCycloideGear())
+Gui.addCommand('CreateBevelGear', CreateBevelGear())

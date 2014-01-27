@@ -14,13 +14,14 @@ class gearWorkbench(Workbench):
 
     def Initialize(self):
 
-        from gearfunc import CreateCycloideGear, CreateInvoluteGear
+        from gearfunc import CreateCycloideGear, CreateInvoluteGear, CreateBevelGear
 
-        self.appendToolbar("Gear", ["CreateInvoluteGear", "CreateCycloideGear"])
-        self.appendMenu("Gear", ["CreateInvoluteGear", "CreateCycloideGear"])
+        self.appendToolbar("Gear", ["CreateInvoluteGear", "CreateCycloideGear", "CreateBevelGear"])
+        self.appendMenu("Gear", ["CreateInvoluteGear", "CreateCycloideGear","CreateBevelGear"])
         Gui.addIconPath(FreeCAD.getHomePath()+"Mod/gear/icons/")
         Gui.addCommand('CreateInvoluteGear', CreateInvoluteGear())
         Gui.addCommand('CreateCycloideGear', CreateCycloideGear())
+        Gui.addCommand('CreateBevelGear', CreateBevelGear())
 
     def Activated(self):
         pass

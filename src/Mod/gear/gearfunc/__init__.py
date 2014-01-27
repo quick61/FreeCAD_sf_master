@@ -1,5 +1,5 @@
 import FreeCAD
-from _Classes import involute_gear, cycloide_gear
+from _Classes import involute_gear, cycloide_gear, bevel_gear
 
 
 class CreateInvoluteGear():
@@ -38,5 +38,24 @@ class CreateCycloideGear():
     def Activated(self):
         a = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", "cycloide_gear")
         cycloide_gear(a)
+        a.ViewObject.Proxy = 0.
+        FreeCAD.ActiveDocument.recompute()
+
+class CreateBevelGear():
+    def __init__(self):
+        pass
+
+    def GetResources(self):
+        return {'Pixmap': 'involutegear.svg', 'MenuText': 'involute gear', 'ToolTip': 'involute gear'}
+
+    def IsActive(self):
+        if FreeCAD.ActiveDocument is None:
+            return False
+        else:
+            return True
+
+    def Activated(self):
+        a = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", "bevel_gear")
+        bevel_gear(a)
         a.ViewObject.Proxy = 0.
         FreeCAD.ActiveDocument.recompute()

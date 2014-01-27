@@ -8,10 +8,10 @@ class Glider():
 
     def __init__(self):
         glider1 = glider.Glider()
-        glider1.import_geometry("/home/lo/Dokumente/OpenGlider/tests/demokite.ods")
+        glider1.import_geometry("../tests/demokite.ods")
         glider1.close_rib(-1)
         glider1.recalc()
-        self.polygons, self.points = glider1.return_polygons(10)
+        self.polygons, self.points = glider1.return_polygons(2)
         self.execute()
 
 
