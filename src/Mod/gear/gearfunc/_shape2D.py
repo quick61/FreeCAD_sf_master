@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division
+
 from math import cos, sin, atan, pi, tan, sqrt, acos
 from numpy import array, dot, linspace, transpose, vstack, ndarray
 from numpy.linalg import solve
@@ -233,10 +234,132 @@ class cycloidegear():
     def _update(self):
         self.__init__(m = self.m, z = self.z, d1 = self.d1, d2 = self.d2, clearence = self.clearence)
 
+
+class bevelgear(object):
+    def __init__(self, alpha = 70 * pi / 180, gamma = pi / 4 , z = 21):
+        self.alpha = alpha
+        self.gamma = gamma
+        self.z = z
+
+        self.involute_end = acos(
+            0.7071067811865475 * sqrt((42. + 16.*cos(2.*self.alpha) + 
+            6.*cos(4.*self.alpha) + cos(4.*self.alpha - 4.*self.gamma) - 8.*cos(2.*self.alpha - 2.*self.gamma) - 
+            4.*cos(4.*self.alpha - 2.*self.gamma) + 24.*cos(2.*self.gamma) - 2.*cos(4.*self.gamma) - 
+            8.*cos(2.*(self.alpha + self.gamma)) + cos(4.*(self.alpha + self.gamma)) - 
+            4.*cos(4.*self.alpha + 2.*self.gamma) + 24.*cos((4.*sin(self.gamma))/self.z) + 
+            4.*cos(2.*self.alpha - (4.*sin(self.gamma))/self.z) + 4.*cos(2.*self.alpha - 
+            4.*self.gamma - (4.*sin(self.gamma))/self.z) - 8.*cos(2.*self.alpha - 2.*self.gamma - 
+            (4.*sin(self.gamma))/self.z) + 24.*cos(4.*(self.gamma + sin(self.gamma)/self.z)) - 
+            8.*cos(2.*(self.alpha + self.gamma + (2.*sin(self.gamma))/self.z)) + 4.*cos(2.*self.alpha + 
+            (4.*sin(self.gamma))/self.z) + 16.*cos(2.*self.gamma + (4.*sin(self.gamma))/self.z) + 
+            4.*cos(2.*self.alpha + 4.*self.gamma + (4.*sin(self.gamma))/self.z) + 32.*abs(cos(self.gamma + 
+            (2.*sin(self.gamma))/self.z))*cos(self.alpha)*sqrt(4.*cos(2.*self.alpha) - 
+            2.*(-2. + cos(2.*self.alpha - 2.*self.gamma) - 2.*cos(2.*self.gamma) + cos(2.*(self.alpha + self.gamma)) + 
+            4.*cos(2.*self.gamma + (4.*sin(self.gamma))/self.z)))*sin(2.*self.gamma))/(-6. - 2.*cos(2.*self.alpha) + 
+            cos(2.*self.alpha - 2.*self.gamma) - 2.*cos(2.*self.gamma) + cos(2.*(self.alpha + self.gamma)))**2))
+        
+        self.involute_start = -pi/2. + atan(1/tan(self.gamma)*1/cos(self.alpha))
+        self.involute_start_radius = self.getradius(self.involute_start)
+        self.r_f = sin(self.gamma - sin(gamma) * 2 / self.z)
+        self.z_f = cos(self.gamma - sin(gamma) * 2 / self.z)
+        self.add_foot = True
+
+        if self.involute_start_radius < self.r_f:
+            self.add_foot = False
+            print(self.involute_start_radius - sin(self.gamma - 2 / self.z))
+            self.involute_start = -acos(
+                sqrt((42 + 16*cos(2*self.alpha) + 6*cos(4*self.alpha) - 
+                4*cos(4*self.alpha - 2*self.gamma) - 8*cos(2*(self.alpha - self.gamma)) + 
+                cos(4*(self.alpha - self.gamma)) + 24*cos(2*self.gamma) - 2*cos(4*self.gamma) - 
+                8*cos(2*(self.alpha + self.gamma)) + cos(4*(self.alpha + self.gamma)) - 
+                4*cos(2*(2*self.alpha + self.gamma)) + 24*cos((4*sin(self.gamma))/self.z) + 
+                4*cos(2*self.alpha - (4*sin(self.gamma))/self.z) + 16*cos(2*self.gamma - 
+                (4*sin(self.gamma))/self.z) + 24*cos(4*self.gamma - (4*sin(self.gamma))/self.z) + 
+                4*cos(2*self.alpha + 4*self.gamma - (4*sin(self.gamma))/self.z) - 
+                8*cos(2*(self.alpha + self.gamma - (2*sin(self.gamma))/self.z)) + 
+                4*cos(2*self.alpha + (4*sin(self.gamma))/self.z) + 4*cos(2*self.alpha - 
+                4*self.gamma + (4*sin(self.gamma))/self.z) - 8*cos(2*self.alpha - 2*self.gamma + 
+                (4*sin(self.gamma))/self.z) + 32*sqrt(2)*sqrt(-(cos(self.alpha)**2*
+                (-2 - 2*cos(2*self.alpha) + cos(2*(self.alpha - self.gamma)) - 
+                2*cos(2*self.gamma) + cos(2*(self.alpha + self.gamma)) + 
+                4*cos(2*self.gamma - (4*sin(self.gamma))/self.z))*cos(self.gamma - (2*sin(self.gamma))/self.z)**2*
+                sin(2*self.gamma)**2)))/(-6 - 2*cos(2*self.alpha) + cos(2*(self.alpha - self.gamma)) - 
+                2*cos(2*self.gamma) + cos(2*(self.alpha + self.gamma)))**2)/sqrt(2))
+        
+    def involute_function_x(self):
+        return(lambda s: (
+            -(cos(s*1/sin(self.alpha)*1/sin(self.gamma))*sin(self.alpha)*sin(s)) + 
+            (cos(s)*sin(self.gamma) + cos(self.alpha)*cos(self.gamma)*sin(s))*
+            sin(s*1/sin(self.alpha)*1/sin(self.gamma))))
+
+    def involute_function_y(self):
+        return(lambda s: (
+            cos(s*1/sin(self.alpha)*1/sin(self.gamma))*(cos(s)*sin(self.gamma) + 
+            cos(self.alpha)*cos(self.gamma)*sin(s)) + sin(self.alpha)*sin(s)*
+            sin(s*1/sin(self.alpha)*1/sin(self.gamma))))
+
+    def involute_function_z(self):
+        return(lambda s: (
+        cos(self.gamma)*cos(s) - cos(self.alpha)*sin(self.gamma)*sin(s)))
+
+    def getradius(self, s):
+        x = self.involute_function_x()
+        y = self.involute_function_y()
+        rx = x(s)
+        ry = y(s)        
+        return(sqrt(rx**2 + ry**2))
+
+
+    def involute_points(self, num=10):
+        pts = linspace(self.involute_start, self.involute_end, num=num)
+        fx = self.involute_function_x()
+        x = array(map(fx, pts))
+        fy = self.involute_function_y()
+        y = array(map(fy, pts))
+        fz = self.involute_function_z()
+        z = array(map(fz, pts))
+        xyz = transpose(array([x, y,z]))
+        if self.add_foot:
+            p = xyz[1]
+            p1 =map(lambda x: x * (self.r_f / sqrt(p[0]**2 + p[1]**2)), p)
+            p1[2] = self.z_f
+            xyz=vstack([[p1], xyz])
+        xy = [[i[0]/i[2],i[1]/i[2],1.] for i in xyz]
+        return(xy)
+
+    def points(self, num=10):
+        pts = self.involute_points(num = num)
+        rot = rotation3D(-pi/self.z/2)
+        pts = rot(pts)
+        ref = reflection3D(pi/2)
+        pts1 = ref(pts)[::-1]
+        rot = rotation3D(2*pi/self.z)
+        pt3 = rot(pts[0])
+        if self.add_foot:
+            return(array([
+                [pts[0],pts[1]],
+                pts[1:],
+                [pts[-1], pts1[0]], 
+                pts1[:-1],
+                [pts1[-2], pts1[-1]],
+                [pts1[-1],pt3]]))
+            return(array([pts,[pts[-1],pts1[0]], pts1,[pts1[-1],pt3]]))
+        else:
+            return(array([pts,[pts[-1],pts1[0]], pts1,[pts1[-1],pt3]]))
+
+    def _update(self):
+        self.__init__(z = self.z,
+                alpha = self.alpha,  gamma = self.gamma)
+
+
+
 def reflection(alpha):
     mat = array([[cos(2 * alpha), -sin(2 * alpha)],[-sin(2 * alpha), -cos(2 * alpha)]])
     return(lambda x: dot(x, mat))
 
+def reflection3D(alpha):
+    mat = array([[cos(2 * alpha), -sin(2 * alpha),0.],[-sin(2 * alpha), -cos(2 * alpha),0.],[0.,0.,1.]])
+    return(lambda x: dot(x, mat))
 
 def rotation(alpha, midpoint=[0, 0]):
     mat = array([[cos(alpha), -sin(alpha)], [sin(alpha), cos(alpha)]])
@@ -244,6 +367,10 @@ def rotation(alpha, midpoint=[0, 0]):
     vec = midpoint - dot(midpoint, mat)
     trans = translation(vec)
     return(lambda xx: trans(dot(xx, mat)))
+
+def rotation3D(alpha):
+    mat = array([[cos(alpha), -sin(alpha),0.], [sin(alpha), cos(alpha),0.],[0.,0.,1.]])
+    return(lambda xx: dot(xx, mat))
 
 
 def translation(vec):

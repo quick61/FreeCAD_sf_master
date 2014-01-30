@@ -1,11 +1,13 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 import FreeCAD as App
-from _shape2D import gearwheel, cycloidegear
-from Part import BSplineCurve, Shape, Wire, Face, makePolygon, BRepOffsetAPI, Shell, Solid, makeLoft
+from _shape2D import gearwheel, cycloidegear, bevelgear
+from Part import BSplineCurve, Shape, Wire, Face, makePolygon, BRepOffsetAPI, Shell, Solid, makeLoft, show
 from math import pi, cos, sin, tan
 
 
 fcvec = lambda x: App.Vector(x[0],x[1],0)
+fcvec3 = lambda x: App.Vector(x[0],x[1],x[2])
 
 class involute_gear():
     """FreeCAD gear"""
@@ -182,73 +184,55 @@ class cycloide_gear():
 
 
 class bevel_gear():
-    """FreeCAD gear"""
+    """parameters:
+        alpha:  pressureangle,   10-30°
+        gamma:  cone angle,      0 < gamma < pi/4
+    """
     def __init__(self, obj):
-        self.gearwheel = gearwheel()
+        self.bevelgear = bevelgear()
         obj.addProperty("App::PropertyInteger", "teeth","props", "number of teeth")
-        obj.addProperty("App::PropertyFloat", "modul", "props","modul")
-        obj.addProperty("App::PropertyBool", "undercut", "props","undercut")
-        obj.addProperty("App::PropertyFloat", "shift", "props","shift")
         obj.addProperty("App::PropertyFloat", "hight", "props","hight")
+        obj.addProperty("App::PropertyAngle", "gamma", "props", "gamma")
         obj.addProperty("App::PropertyAngle", "alpha", "props", "alpha")
-        obj.addProperty("App::PropertyFloat", "clearence", "props", "clearence")
+        obj.addProperty("App::PropertyFloat", "m", "props", "m")
+        obj.addProperty("App::PropertyFloat", "c", "props", "clearence")
         obj.addProperty("App::PropertyInteger", "numpoints", "props", "number of points for spline")
-        obj.addProperty("App::PropertyAngle", "beta", "props", "beta ")
+        obj.m = 0.25
         obj.teeth = 15
-        obj.modul = 0.25
-        obj.undercut = True
-        obj.shift = 0.
-        obj.alpha = 20.
-        obj.beta = 0.
+        obj.alpha = 70.
+        obj.gamma = 45.
         obj.hight = 1.
-        obj.clearence = 0.12
         obj.numpoints = 6
         self.obj = obj
         obj.Proxy = self
 
     def execute(self, fp):
-        self.gearwheel.m_n = fp.modul
-        self.gearwheel.z = fp.teeth
-        self.gearwheel.undercut = fp.undercut
-        self.gearwheel.shift = fp.shift
-        self.gearwheel.alpha = fp.alpha * pi / 180.
-        self.gearwheel.beta = fp.beta * pi / 180
-        self.gearwheel.clearence = fp.clearence
-        self.gearwheel._update()
-        pts = self.gearwheel.points(num = fp.numpoints)
-        w1 = []
+        self.bevelgear.z = fp.teeth
+        self.bevelgear.alpha = fp.alpha * pi / 180.
+        self.bevelgear.gamma = fp.gamma * pi / 180
+        self.bevelgear._update()
+        pts = self.bevelgear.points(num = fp.numpoints)
+        w1 = self.createteeths(pts, fp.m * fp.teeth / 2 + fp.hight / 2)  
+        w2 = self.createteeths(pts, fp.m * fp.teeth / 2 - fp.hight / 2)
+        fp.Shape = makeLoft([w1,w2],True)
+
+    def createteeths(self, pts, pos):
+        w1=[]
         for i in pts:
+            scale = lambda x: x*pos
+            i_scale = map(scale, i)
             out = BSplineCurve()
-            out.interpolate(map(fcvec,i))
+            out.interpolate(map(fcvec3,i_scale))
             w1.append(out)
         s = Shape(w1)
         wi0 = Wire(s.Edges)
         wi=[]
-        for i in range(self.gearwheel.z):
+        for i in range(self.bevelgear.z):
             rot = App.Matrix()
-            rot.rotateZ(i*self.gearwheel.phipart)
-            wi.append(wi0.transformGeometry(rot))
-        wi = Wire(wi)           
-        fp.Shape = helicalextrusion1(wi, fp.hight, fp.hight * tan(self.gearwheel.beta) * 2 / self.gearwheel.d,0.7)
+            rot.rotateZ(-2*i*pi/self.bevelgear.z)
+            wi.append(wi0.transformGeometry(rot)) 
+        return(Wire(wi))
 
-    def onChanged(self, fp, prop):
-        if abs(fp.shift) > 1.:
-            App.Console.PrintWarning("shift!!!")
-        if abs(fp.beta)> 45:
-            App.Console.PrintWarning("beta!!!")
-            fp.beta = 0.
-        if  abs(fp.alpha) > 40:
-            App.Console.PrintWarning("alpha!!!")
-            fp.alpha = 0.
-        if fp.modul <= 0.:
-            App.Console.PrintWarning("modul!!!")
-            fp.modul = 0.25
-        if fp.clearence > 0.25:
-            App.Console.PrintWarning("clearence!!!")
-            fp.clearence = 0.25
-        if fp.clearence < 0.00:
-            App.Console.PrintWarning("clearence!!!")
-            fp.clearence = 0.00
 
 def helicalextrusion1(wire, height, angle, scale):
     faceb = wire
