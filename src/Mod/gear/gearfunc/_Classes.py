@@ -212,8 +212,8 @@ class bevel_gear():
         self.bevelgear.gamma = fp.gamma * pi / 180
         self.bevelgear._update()
         pts = self.bevelgear.points(num = fp.numpoints)
-        w1 = self.createteeths(pts, fp.m * fp.teeth / 2 + fp.hight / 2)  
-        w2 = self.createteeths(pts, fp.m * fp.teeth / 2 - fp.hight / 2)
+        w1 = self.createteeths(pts, fp.m * fp.teeth / 2 / tan(fp.gamma * pi / 180) + fp.hight / 2)  
+        w2 = self.createteeths(pts, fp.m * fp.teeth / 2 / tan(fp.gamma * pi / 180) - fp.hight / 2)
         fp.Shape = makeLoft([w1,w2],True)
 
     def createteeths(self, pts, pos):
