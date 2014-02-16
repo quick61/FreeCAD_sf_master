@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#***************************************************************************
+#*                                                                         *
+#*   This program is free software; you can redistribute it and/or modify  *
+#*   it under the terms of the GNU Lesser General Public License (LGPL)    *
+#*   as published by the Free Software Foundation; either version 2 of     *
+#*   the License, or (at your option) any later version.                   *
+#*   for detail see the LICENCE text file.                                 *
+#*                                                                         *
+#*   This program is distributed in the hope that it will be useful,       *
+#*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+#*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+#*   GNU Library General Public License for more details.                  *
+#*                                                                         *
+#*   You should have received a copy of the GNU Library General Public     *
+#*   License along with this program; if not, write to the Free Software   *
+#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+#*   USA                                                                   *
+#*                                                                         *
+#***************************************************************************
+
 
 from __future__ import division
 
@@ -11,7 +31,7 @@ from numpy.linalg import solve
 # dg...groundcircle
 # dw...pitch circle
 # df...? fußkreis
-# c... ? Kopfspiel
+# c... ? clearence
 
 class gearrack():
 
@@ -55,7 +75,7 @@ class gearrack():
 
 class gearwheel():
 
-    def __init__(self, m=5, z=15, alpha=20 * pi / 180., clearence = 0.12, shift = 0.5, beta = 0., undercut = False):
+    def __init__(self, m=5, z=15, alpha=20 * pi / 180., clearence = 0.12, shift = 0.5, beta = 0., undercut = False, backslash = 0.01):
         self.alpha = alpha
         self.beta = beta
         self.m_n = m
@@ -63,6 +83,7 @@ class gearwheel():
         self.undercut = undercut
         self.shift = shift
         self.clearence = clearence
+        self.backslash = backslash
         self.alpha_t = atan(tan(self.alpha) / cos(self.beta))
         self.m = self.m_n / cos(self.beta)
         self.c = self.clearence * self.m_n
@@ -103,7 +124,8 @@ class gearwheel():
         x = array(map(fx, pts))
         fy = self.involute_function_y()
         y = array(map(fy, pts))
-        rot = rotation(self.involute_rot)
+        print(self.backslash / self.d / 4)
+        rot = rotation(self.involute_rot - self.backslash / 4)
         xy = rot(transpose(array([x, y])))
         return(xy)
 
@@ -160,14 +182,15 @@ class gearwheel():
     def _update(self):
         self.__init__(m = self.m_n, z = self.z,
                 alpha = self.alpha, clearence = self.clearence, shift = self.shift, 
-                beta = self.beta, undercut = self.undercut)
+                beta = self.beta, undercut = self.undercut, backslash = self.backslash)
 
 
 class cycloidegear():
-    def __init__(self, d1 = 10, d2 = 10, z = 14, m = 5, clearence = 0.12):
+    def __init__(self, d1 = 10, d2 = 10, z = 14, m = 5, clearence = 0.12, backslash = 0.01):
         self.m = m
         self.z = z
         self.clearence = clearence
+        self.backslash = backslash
         self.d1 = d1 * self.m
         self.d2 = d2 * self.m
         self.c = self.clearence * self.m
@@ -222,7 +245,7 @@ class cycloidegear():
         pts_outer = transpose([pts_outer_x, pts_outer_y])
         pts_inner = transpose([pts_inner_x, pts_inner_y])
         pts1 = vstack([pts_inner[:-2],pts_outer])
-        rot =rotation(self.phipart/4)
+        rot =rotation(self.phipart/4 - self.backslash)
         pts1 = rot(pts1)
         ref = reflection(0.)
         pts2 = ref(pts1)[::-1]
@@ -232,14 +255,16 @@ class cycloidegear():
         return(pts)
 
     def _update(self):
-        self.__init__(m = self.m, z = self.z, d1 = self.d1, d2 = self.d2, clearence = self.clearence)
+        self.__init__(m = self.m, z = self.z, d1 = self.d1, d2 = self.d2, clearence = self.clearence, backslash = self.backslash)
 
 
 class bevelgear(object):
-    def __init__(self, alpha = 70 * pi / 180, gamma = pi / 4 , z = 21):
+    def __init__(self, alpha = 70 * pi / 180, gamma = pi / 4 , z = 21, backslash = 0.01, module = 0.25):
         self.alpha = alpha
         self.gamma = gamma
         self.z = z
+        self.backslash = backslash
+        self.module = module
 
         self.involute_end = acos(
             0.7071067811865475 * sqrt((42. + 16.*cos(2.*self.alpha) + 
@@ -266,7 +291,6 @@ class bevelgear(object):
 
         if self.involute_start_radius < self.r_f:
             self.add_foot = False
-            print(self.involute_start_radius - sin(self.gamma - 2 / self.z))
             self.involute_start = -acos(
                 sqrt((42 + 16*cos(2*self.alpha) + 6*cos(4*self.alpha) - 
                 4*cos(4*self.alpha - 2*self.gamma) - 8*cos(2*(self.alpha - self.gamma)) + 
@@ -325,6 +349,8 @@ class bevelgear(object):
             p1[2] = self.z_f
             xyz=vstack([[p1], xyz])
         xy = [[i[0]/i[2],i[1]/i[2],1.] for i in xyz]
+        backslash_rot = rotation3D(self.backslash / 4)
+        xy = backslash_rot(xy)
         return(xy)
 
     def points(self, num=10):
@@ -349,7 +375,7 @@ class bevelgear(object):
 
     def _update(self):
         self.__init__(z = self.z,
-                alpha = self.alpha,  gamma = self.gamma)
+                alpha = self.alpha,  gamma = self.gamma, backslash = self.backslash, module = self.module)
 
 
 
